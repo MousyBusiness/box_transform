@@ -150,6 +150,9 @@ class TransformableBox extends StatefulWidget {
   /// A callback that is called every time the [TransformableBox] is tapped.
   final VoidCallback? onTap;
 
+  /// A callback that is called every time the [TransformableBox] is double tapped.
+  final VoidCallback? onDoubleTap;
+
   /// A callback that is called when [TransformableBox] triggers a pointer down
   /// event to begin a drag operation.
   final RectDragStartEvent? onDragStart;
@@ -259,6 +262,7 @@ class TransformableBox extends StatefulWidget {
 
     // Tap events
     this.onTap,
+    this.onDoubleTap,
 
     // Either resize or drag triggers.
     this.onChanged,
@@ -306,9 +310,7 @@ class TransformableBox extends StatefulWidget {
 
   /// Returns the [TransformableBoxController] of the closest ancestor.
   static TransformableBoxController? controllerOf(BuildContext context) {
-    return context
-        .findAncestorStateOfType<_TransformableBoxState>()
-        ?.controller;
+    return context.findAncestorStateOfType<_TransformableBoxState>()?.controller;
   }
 
   @override
@@ -337,8 +339,7 @@ class _TransformableBoxState extends State<TransformableBox> {
 
   bool get isGestureActive => isDragging || isResizing;
 
-  bool mismatchedHandle(HandlePosition handle) =>
-      lastHandle != null && lastHandle != handle;
+  bool mismatchedHandle(HandlePosition handle) => lastHandle != null && lastHandle != handle;
 
   @override
   void initState() {
@@ -365,8 +366,7 @@ class _TransformableBoxState extends State<TransformableBox> {
   void didUpdateWidget(covariant TransformableBox oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (widget.controller != null && oldWidget.controller == null ||
-        widget.controller != oldWidget.controller) {
+    if (widget.controller != null && oldWidget.controller == null || widget.controller != oldWidget.controller) {
       // New explicit controller provided or explicit controller changed.
       controller.removeListener(onControllerUpdate);
       controller = widget.controller!;
@@ -409,22 +409,18 @@ class _TransformableBoxState extends State<TransformableBox> {
       );
     }
 
-    if (oldWidget.clampingRect != widget.clampingRect ||
-        widget.clampingRect != controller.clampingRect) {
+    if (oldWidget.clampingRect != widget.clampingRect || widget.clampingRect != controller.clampingRect) {
       controller.setClampingRect(widget.clampingRect, notify: false);
       shouldRecalculatePosition = true;
     }
 
-    if (oldWidget.constraints != widget.constraints ||
-        widget.constraints != controller.constraints) {
+    if (oldWidget.constraints != widget.constraints || widget.constraints != controller.constraints) {
       controller.setConstraints(widget.constraints, notify: false);
       shouldRecalculateSize = true;
     }
 
-    if (oldWidget.allowFlippingWhileResizing !=
-            widget.allowFlippingWhileResizing ||
-        widget.allowFlippingWhileResizing !=
-            controller.allowFlippingWhileResizing) {
+    if (oldWidget.allowFlippingWhileResizing != widget.allowFlippingWhileResizing ||
+        widget.allowFlippingWhileResizing != controller.allowFlippingWhileResizing) {
       controller.setAllowFlippingWhileResizing(
         widget.allowFlippingWhileResizing,
         notify: false,
@@ -538,6 +534,13 @@ class _TransformableBoxState extends State<TransformableBox> {
     widget.onTap?.call();
   }
 
+  /// Called when the box is double tapped.
+  void onDoubleTap() {
+    if (isGestureActive) return;
+
+    widget.onDoubleTap?.call();
+  }
+
   /// Called when the box drag event starts.
   void onDragPanStart(DragStartDetails event) {
     if (isGestureActive) return;
@@ -598,6 +601,7 @@ class _TransformableBoxState extends State<TransformableBox> {
         behavior: HitTestBehavior.translucent,
         supportedDevices: widget.supportedDragDevices,
         onTap: widget.onTap == null ? null : onTap,
+        onDoubleTap: widget.onDoubleTap == null ? null : onDoubleTap,
         onPanStart: onDragPanStart,
         onPanUpdate: onDragPanUpdate,
         onPanEnd: onDragPanEnd,
@@ -620,9 +624,8 @@ class _TransformableBoxState extends State<TransformableBox> {
             child: content,
           ),
           if (widget.resizable)
-            for (final handle in HandlePosition.corners.where((handle) =>
-                widget.visibleHandles.contains(handle) ||
-                widget.enabledHandles.contains(handle)))
+            for (final handle in HandlePosition.corners
+                .where((handle) => widget.visibleHandles.contains(handle) || widget.enabledHandles.contains(handle)))
               CornerHandleWidget(
                 key: ValueKey(handle),
                 handlePosition: handle,
@@ -637,9 +640,8 @@ class _TransformableBoxState extends State<TransformableBox> {
                 builder: widget.cornerHandleBuilder,
               ),
           if (widget.resizable)
-            for (final handle in HandlePosition.sides.where((handle) =>
-                widget.visibleHandles.contains(handle) ||
-                widget.enabledHandles.contains(handle)))
+            for (final handle in HandlePosition.sides
+                .where((handle) => widget.visibleHandles.contains(handle) || widget.enabledHandles.contains(handle)))
               SideHandleWidget(
                 key: ValueKey(handle),
                 handlePosition: handle,
