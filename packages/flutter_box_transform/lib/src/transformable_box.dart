@@ -150,6 +150,9 @@ class TransformableBox extends StatefulWidget {
   /// A callback that is called every time the [TransformableBox] is tapped.
   final VoidCallback? onTap;
 
+    /// A callback that is called when [TransformableBox] double tapped down.
+  final GestureTapDownCallback? onDoubleTapDown;
+
   /// A callback that is called every time the [TransformableBox] is double tapped.
   final VoidCallback? onDoubleTap;
 
@@ -262,6 +265,7 @@ class TransformableBox extends StatefulWidget {
 
     // Tap events
     this.onTap,
+    this.onDoubleTapDown,
     this.onDoubleTap,
 
     // Either resize or drag triggers.
@@ -534,6 +538,13 @@ class _TransformableBoxState extends State<TransformableBox> {
     widget.onTap?.call();
   }
 
+    /// Called when the box is double tapped.
+  void onDoubleTapDown(TapDownDetails details) {
+    if (isGestureActive) return;
+
+    widget.onDoubleTapDown?.call(details);
+  }
+
   /// Called when the box is double tapped.
   void onDoubleTap() {
     if (isGestureActive) return;
@@ -601,6 +612,7 @@ class _TransformableBoxState extends State<TransformableBox> {
         behavior: HitTestBehavior.translucent,
         supportedDevices: widget.supportedDragDevices,
         onTap: widget.onTap == null ? null : onTap,
+        onDoubleTapDown: widget.onDoubleTapDown == null ? null : onDoubleTapDown,
         onDoubleTap: widget.onDoubleTap == null ? null : onDoubleTap,
         onPanStart: onDragPanStart,
         onPanUpdate: onDragPanUpdate,
