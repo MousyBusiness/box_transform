@@ -2,6 +2,7 @@ import 'package:box_transform/box_transform.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'typedefs.dart';
 import 'ui_box_transform.dart';
 import 'ui_result.dart';
 
@@ -14,7 +15,7 @@ import 'ui_result.dart';
 /// If you want to use it on soft keyboards, you can
 /// implement your own [ResizeModeResolver] and pass it to the
 /// [TransformableBoxController] constructor.
-ResizeMode defaultResizeModeResolver() {
+ResizeMode defaultResizeModeResolver(HandlePosition _) {
   final pressedKeys = WidgetsBinding.instance.keyboard.logicalKeysPressed;
 
   final isAltPressed = pressedKeys.contains(LogicalKeyboardKey.altLeft) ||
@@ -42,7 +43,7 @@ class TransformableBoxController extends ChangeNotifier {
     Flip? flip,
     Rect? clampingRect,
     BoxConstraints? constraints,
-    ValueGetter<ResizeMode>? resizeModeResolver,
+    ResizeModeResolver? resizeModeResolver,
     bool allowFlippingWhileResizing = true,
   })  : _rect = rect ?? Rect.zero,
         _flip = flip ?? Flip.none,
@@ -53,11 +54,11 @@ class TransformableBoxController extends ChangeNotifier {
 
   /// The callback function that is used to resolve the [ResizeMode] based on
   /// the pressed keys on the keyboard.
-  ValueGetter<ResizeMode> _resizeModeResolver;
+  ResizeModeResolver _resizeModeResolver;
 
   /// The callback function that is used to resolve the [ResizeMode] based on
   /// the pressed keys on the keyboard.
-  ValueGetter<ResizeMode> get resizeModeResolver => _resizeModeResolver;
+  ResizeModeResolver get resizeModeResolver => _resizeModeResolver;
 
   /// The current [Rect] of the [TransformableBox].
   Rect _rect = Rect.zero;
@@ -117,7 +118,7 @@ class TransformableBoxController extends ChangeNotifier {
 
   /// Sets the current [resizeModeResolver] of the [TransformableBox].
   void setResizeModeResolver(
-    ValueGetter<ResizeMode> resizeModeResolver, {
+    ResizeModeResolver resizeModeResolver, {
     bool notify = true,
   }) {
     _resizeModeResolver = resizeModeResolver;
@@ -277,7 +278,7 @@ class TransformableBoxController extends ChangeNotifier {
     Offset localPosition,
     HandlePosition handle, {
     bool notify = true,
-    ValueGetter<ResizeMode>? resizeModeResolver,
+    ResizeModeResolver? resizeModeResolver,
   }) {
     // Calculate the new rect based on the initial rect, initial local position,
     final UIResizeResult result = UIBoxTransform.resize(
@@ -285,7 +286,7 @@ class TransformableBoxController extends ChangeNotifier {
       handle: handle,
       initialRect: initialRect,
       initialLocalPosition: initialLocalPosition,
-      resizeMode: resizeModeResolver?.call() ?? this.resizeModeResolver(),
+      resizeMode: resizeModeResolver?.call(handle) ?? this.resizeModeResolver(handle),
       initialFlip: initialFlip,
       clampingRect: clampingRect,
       constraints: constraints,

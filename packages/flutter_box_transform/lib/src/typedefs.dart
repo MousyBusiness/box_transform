@@ -88,3 +88,6 @@ typedef TerminalEvent = void Function(
   bool reachedMinHeight,
   bool reachedMaxHeight,
 );
+
+// A function which resolves the resize mode basaed on handle position
+typedef ResizeModeResolver = ResizeMode Function(HandlePosition handle);

@@ -140,7 +140,7 @@ class TransformableBox extends StatefulWidget {
 
   /// The callback function that is used to resolve the [ResizeMode] based on
   /// the pressed keys on the keyboard.
-  final ValueGetter<ResizeMode> resizeModeResolver;
+  final ResizeModeResolver resizeModeResolver;
 
   /// A callback that is called every time the [TransformableBox] is updated.
   /// This is called every time the [TransformableBoxController] mutates the box
@@ -256,7 +256,7 @@ class TransformableBox extends StatefulWidget {
     Flip? flip,
     Rect? clampingRect,
     BoxConstraints? constraints,
-    ValueGetter<ResizeMode>? resizeModeResolver,
+    ResizeModeResolver? resizeModeResolver,
 
     // Additional controls.
     this.resizable = true,
